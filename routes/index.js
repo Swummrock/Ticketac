@@ -16,25 +16,81 @@ var date = ["2018-11-20", "2018-11-21", "2018-11-22", "2018-11-23", "2018-11-24"
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
-
-router.get('/', function (req, res, next) {
   res.render('login');
 });
 
-router.get('/ticketac', async function (req, res, next) {
-  if (req.session.user == null) {
-    res.redirect('/')
-  } else {
-    var journeyList = await journeyModel.find();
+router.post('/sign-up', async function (req, res, next) {
 
-    res.render('ticketac', { journeyList })
+  var searchUser = await userModel.findOne({
+    email: req.body.email
+  })
+  console.log(searchUser)
+
+  if (!searchUser) {
+    var newUser = new userModel({
+      name: req.body.name,
+      firstname: req.body.firstname,
+      email: req.body.email,
+      password: req.body.password,
+    })
+
+    var newUserSave = await newUser.save();
+    console.log(newUserSave)
+
+    req.session.user = {
+      name: newUserSave.name,
+      id: newUserSave._id,
+    }
+
+    res.redirect('/ticetac')
+  } else {
+    res.redirect('/')
+  }
+
+})
+
+router.get('/ticetac', async function (req, res, next) {
+  // if (req.session.user == null) {
+  //   res.redirect('/')
+  // } else {
+  //   var journeyList = await journeyModel.find();
+
+  res.render('ticetac', )
+  // }
+})
+
+router.post('/sign-in', async function (req, res, next) {
+
+  var searchUser = await userModel.findOne({
+    email: req.body.email,
+    password: req.body.password
+  })
+
+  if (searchUser != null) {
+    req.session.user = {
+      email: searchUser.email,
+      password: searchUser.password
+    }
+    res.redirect('/ticetac')
+  } else {
+    res.render('login')
   }
 })
 
+
 router.get('/available', async function (req, res, next) {
-  var journeyList = await journeyModel.find();
+  var depart = req.body.departCity;
+  console.log(depart)
+  var arrival = req.body.arrivalCity;
+  var date = req.body.chooseDate;
+  console.log(arrival);
+  console.log(date);
+
+  var journeyList = await journeyModel.find({
+    departure: req.body.departCity,
+    arrival: req.body.arrivalCity
+  })
+  console.log(journeyList)
 
   for (var i = 0; i < journeyList.length; i++) {
 
@@ -47,11 +103,18 @@ router.get('/available', async function (req, res, next) {
       departureTime: journeyList[i].departureTime,
       price: journeyList[i].price,
     })
-  }
-
-  var journeyList = await journeyModel.find();
-
+  } 
   res.render('available', { journeyList })
+
+  // else {
+  //   res.redirect('/oops')
+  // }
+
+})
+
+router.get('/oops', async function (req, res, next) {
+  res.render('oops', )
+  
 })
 
 
