@@ -93,7 +93,6 @@ router.get('/available', async function (req, res, next) {
   console.log(journeyList)
 
   for (var i = 0; i < journeyList.length; i++) {
-
     await journeyModel.updateOne({
       _id: journeyList[i].id
     }, {
